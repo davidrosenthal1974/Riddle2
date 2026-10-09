@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>משחק 2: הכי מגעיל שיש</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f4f6f8; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; text-align: center; }
+  .card { background: white; padding: 30px 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 440px; width: 100%; box-sizing: border-box; }
+  h1 { color: #2b2d42; font-size: 1.6rem; margin-top: 0; margin-bottom: 8px; }
+  .subtitle { font-size: 1.15rem; color: #d90429; margin-bottom: 25px; font-weight: bold; line-height: 1.4; }
+  .question-box { background: #edf2f4; padding: 18px; border-radius: 14px; font-size: 1.1rem; font-weight: 600; color: #2b2d42; margin-bottom: 20px; line-height: 1.5; border: 1px solid #dce2e6; }
+  input[type="text"] { width: 90%; padding: 14px; font-size: 1.15rem; border: 2px solid #8d99ae; border-radius: 12px; text-align: center; outline: none; margin-bottom: 15px; box-sizing: border-box; transition: 0.2s; }
+  input[type="text"]:focus { border-color: #d90429; }
+  .btn-submit { background: #d90429; color: white; border: none; padding: 14px 35px; font-size: 1.15rem; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; touch-action: manipulation; width: 90%; }
+  .btn-submit:active { background: #ef233c; transform: scale(0.98); }
+  .feedback-msg { margin-top: 15px; font-size: 0.98rem; font-weight: bold; color: #d90429; min-height: 24px; }
+  .clues-container { text-align: right; background: #fff1f2; padding: 15px 18px; border-radius: 14px; margin-top: 20px; border-right: 4px solid #d90429; display: none; }
+  .clues-title { font-weight: bold; color: #d90429; margin-bottom: 8px; font-size: 0.95rem; }
+  .clue-item { font-size: 0.95rem; line-height: 1.5; margin: 6px 0; animation: fadeIn 0.4s ease; }
+  .no-more-clues { font-size: 0.85rem; color: #777; margin-top: 10px; display: none; text-align: center; }
+  .hidden { display: none !important; }
+  .win { animation: fadeIn 0.8s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>משחק 2: הכי מגעיל שיש 🤢</h1>
+  <div class="subtitle">מה הדבר הכי מגעיל שאת יכולה לחשוב עליו?</div>
+
+  <div id="game-section">
+    <div class="question-box">
+      קדימה, נחשי מה הדבר הזה...<br>
+      (רמזים יופיעו אוטומטית בכל טעות!)
+    </div>
+
+    <input type="text" id="guessInput" placeholder="הקלידי את התשובה שלך כאן...">
+    <br>
+    <button type="button" class="btn-submit" id="submitBtn">שלחי ניחוש</button>
+    <div id="feedback" class="feedback-msg"></div>
+
+    <div id="cluesContainer" class="clues-container">
+      <div class="clues-title">רמזים שנחשפו:</div>
+      <div id="cluesList"></div>
+      <div id="noMoreClues" class="no-more-clues">זהו, אין יותר רמזים! צ'ופ צ'ופ, לפצח!</div>
+    </div>
+  </div>
+
+  <div id="win-section" class="hidden win">
+    <div style="font-size: 3.5rem; margin: 10px 0;">🦷 🫖 🎁</div>
+    <h2 style="color: #2b2d42; font-size: 1.8rem; margin: 10px 0;">איכססס! פתרת! 😂</h2>
+    <p style="font-size: 1.15rem; line-height: 1.6; color: #333;">
+      <strong>שיניים תותבות בכוס!</strong><br><br>
+      אבל אל דאגה... זו בסך הכל המתנה השנייה שלך:<br>
+      <strong>מחזיק תיון לתה הכי קורע ומעוצב שיש!</strong> ☕<br><br>
+      גשי מיד ל<strong>דודאווי</strong> ודרשי לקבל אותה!
+    </p>
+  </div>
+</div>
+
+<script>
+  var clues = [
+    "זה לא משהו מקולקל מהמקרר... זה קשור לגוף האדם.",
+    "זה משהו שלא נולדים איתו, אבל לא מעט מבוגרים מקבלים אותו עם השנים.",
+    "תחשבי על הפה והחיוך...",
+    "משהו שנכנס ויוצא מהפה (ולא אוכל).",
+    "תחשבי על סבא וסבתא לפני השינה..."
+  ];
+  var revealedClues = 0;
+
+  var snarkyComments = [
+    "מגעיל, אבל זה לא זה!",
+    "חחחח ממש לא! נסי שוב.",
+    "איכס, מה עובר לך בראש? לא!",
+    "טעות! הנה רמז שיעזור למוח שלך:",
+    "לא קרוב אפילו. תתרכזי!",
+    "עוד ניסיון כושל לאוסף... הנה עוד רמז:",
+    "שלילי חזק. המוח עדיין רדום!",
+    "לא ולא. קראי את הרמזים שנוספו!"
+  ];
+
+  function checkAnswer() {
+    var input = document.getElementById('guessInput');
+    var rawVal = input.value.trim().toLowerCase();
+    var fb = document.getElementById('feedback');
+
+    if (!rawVal) {
+      fb.textContent = "קודם תקלידי משהו!";
+      return;
+    }
+
+    var cleanVal = rawVal.replace(/[\"\'\.\,\-]/g, '');
+
+    var isCorrect = cleanVal.indexOf("שיניים תותבות") !== -1 || 
+                    cleanVal.indexOf("שינים תותבות") !== -1 ||
+                    cleanVal.indexOf("תותבות בכוס") !== -1 ||
+                    cleanVal.indexOf("שיניים בכוס") !== -1;
+
+    if (isCorrect) {
+      fb.textContent = "";
+      document.getElementById('game-section').classList.add('hidden');
+      document.getElementById('win-section').classList.remove('hidden');
+    } else {
+      if (revealedClues < clues.length) {
+        var container = document.getElementById('cluesContainer');
+        var list = document.getElementById('cluesList');
+        container.style.display = 'block';
+
+        var item = document.createElement('div');
+        item.className = 'clue-item';
+        item.innerHTML = "💡 <strong>רמז " + (revealedClues + 1) + ":</strong> " + clues[revealedClues];
+        list.appendChild(item);
+
+        revealedClues++;
+
+        if (revealedClues >= clues.length) {
+          document.getElementById('noMoreClues').style.display = 'block';
+        }
+      }
+
+      var randomComment = snarkyComments[Math.floor(Math.random() * snarkyComments.length)];
+      fb.textContent = randomComment;
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+
+  document.getElementById('guessInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      checkAnswer();
+    }
+  });
+</script>
+</body>
+</html>
