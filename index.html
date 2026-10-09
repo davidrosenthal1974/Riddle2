@@ -54,3 +54,86 @@
     <p style="font-size: 1.15rem; line-height: 1.6; color: #333;">
       <strong>שיניים תותבות בכוס!</strong><br><br>
       הצלחת לפצח את החידה המגעילה בעולם!<br><br>
+      גשי מיד ל<strong>דודאווי</strong> ודרשי לקבל את המתנה שלך!
+    </p>
+  </div>
+</div>
+
+<script>
+  var clues = [
+    "זה לא משהו מקולקל מהמקרר... זה קשור לגוף האדם.",
+    "זה משהו שלא נולדים איתו, אבל לא מעט מבוגרים מקבלים אותו עם השנים.",
+    "תחשבי על הפה והחיוך...",
+    "משהו שנכנס ויוצא מהפה (ולא אוכל).",
+    "תחשבי על סבא וסבתא לפני השינה...",
+    "זה שוכב בכוס עם מים."
+  ];
+  var revealedClues = 0;
+
+  var snarkyComments = [
+    "מגעיל, אבל זה לא זה!",
+    "חחחח ממש לא! נסי שוב.",
+    "איכס, מה עובר לך בראש? לא!",
+    "טעות! הנה רמז שיעזור למוח שלך:",
+    "לא קרוב אפילו. תתרכזי!",
+    "עוד ניסיון כושל לאוסף... הנה עוד רמז:",
+    "שלילי חזק. המוח עדיין רדום!",
+    "לא ולא. קראי את הרמזים שנוספו!"
+  ];
+
+  function checkAnswer() {
+    var input = document.getElementById('guessInput');
+    var rawVal = input.value.trim().toLowerCase();
+    var fb = document.getElementById('feedback');
+
+    if (!rawVal) {
+      fb.textContent = "קודם תקלידי משהו!";
+      return;
+    }
+
+    var cleanVal = rawVal.replace(/[\"\'\.\,\-]/g, '');
+
+    var isCorrect = cleanVal.indexOf("שיניים תותבות") !== -1 || 
+                    cleanVal.indexOf("שינים תותבות") !== -1 ||
+                    cleanVal.indexOf("תותבות בכוס") !== -1 ||
+                    cleanVal.indexOf("שיניים בכוס") !== -1;
+
+    if (isCorrect) {
+      fb.textContent = "";
+      document.getElementById('game-section').classList.add('hidden');
+      document.getElementById('win-section').classList.remove('hidden');
+    } else {
+      if (revealedClues < clues.length) {
+        var container = document.getElementById('cluesContainer');
+        var list = document.getElementById('cluesList');
+        container.style.display = 'block';
+
+        var item = document.createElement('div');
+        item.className = 'clue-item';
+        item.innerHTML = "💡 <strong>רמז " + (revealedClues + 1) + ":</strong> " + clues[revealedClues];
+        list.appendChild(item);
+
+        revealedClues++;
+
+        if (revealedClues >= clues.length) {
+          document.getElementById('noMoreClues').style.display = 'block';
+        }
+      }
+
+      var randomComment = snarkyComments[Math.floor(Math.random() * snarkyComments.length)];
+      fb.textContent = randomComment;
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+
+  document.getElementById('guessInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      checkAnswer();
+    }
+  });
+</script>
+</body>
+</html>
